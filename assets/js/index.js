@@ -1,14 +1,14 @@
-// slider image
 const slides = document.querySelector('.slider');
 const slideCount = document.querySelectorAll('.slide').length;
 const btnLeft = document.querySelector('.btn-slider-left');
 const btnRight = document.querySelector('.btn-slider-right');
-let currentIndex = 0; // current
+let currentIndex = 0;
 
 let isDragging = false; 
 let startX = 0; 
 let currentTranslate = 0; 
 let prevTranslate = 0; 
+
 function showNextSlide() {
     currentIndex++;
     if (currentIndex === slideCount) {
@@ -24,14 +24,12 @@ function showPrevSlide() {
     }
     updateSlidePosition();
 }
-//-------Nút bấm sliders
 btnLeft.addEventListener('click', function() {
     showPrevSlide();
 });
 btnRight.addEventListener('click', function() {
     showNextSlide();
 });
-//--------Kéo thả sliders
 slides.addEventListener('dragstart', (e) => {
     e.preventDefault();
 });
@@ -76,7 +74,6 @@ slides.addEventListener('mouseleave', () => {
         slides.style.transform = `translateX(${prevTranslate}%)`;
     }
 });
-//---------Kéo thả cho mobile---------
 slides.addEventListener('touchstart', (e) => {
     isDragging = true;
     startX = e.touches[0].clientX;
@@ -104,9 +101,7 @@ slides.addEventListener('touchend', () => {
         slides.style.transform = `translateX(${prevTranslate}%)`;
     }
 });
-setInterval(showNextSlide, 5000); 
-
-// Mobile menu toggle
+setInterval(showNextSlide, 5000);   
 document.addEventListener('DOMContentLoaded', function() {
     const dropdownToggle = document.querySelector('.mobile-dropdown-toggle');
     const dropdownMenu = document.querySelector('.mobile-dropdown-menu');
@@ -123,8 +118,6 @@ document.addEventListener('DOMContentLoaded', function() {
         dropdownMenu.classList.toggle('show-sub');
     });
 });
-
-// Sticky header 
 window.addEventListener('scroll', function() {
     var header = document.getElementById('header');
     if (window.scrollY > 100) {
@@ -134,113 +127,59 @@ window.addEventListener('scroll', function() {
     }
 });
 
-// Review click and slider 
+
 const reviewInner = document.querySelector('.review-inner');
 const reviewItems = document.querySelectorAll('.review-item');
-let currentActive = 1;
 
-let isDraggingReview = false;
-let startXReview = 0;
-let currentTranslateX = 0;
-let prevTranslateX = 0;
+let currentActive = 1; // Phần tử ban đầu ở giữa
 
-function updateReview() {
-  reviewItems.forEach((item, index) => {
-    item.classList.toggle('active', index === currentActive);
-  });
+function updateSlider() {
+    // Đảm bảo trạng thái active được cập nhật
+    reviewItems.forEach((item, index) => {
+        item.classList.toggle('active', index === currentActive);
 
-  setTimeout(() => {
-    const activeItem = reviewItems[currentActive];
-    const containerWidth = reviewInner.offsetWidth;
-    const activeItemWidth = activeItem.offsetWidth;
-    const translateX = activeItem.offsetLeft - containerWidth / 2 + activeItemWidth / 2;
-    currentTranslateX = -translateX;
-    reviewInner.style.transform = `translateX(${currentTranslateX}px)`;
-  }, 50);
+        const img = document.createElement('img');
+        img.src = './assets/images/review_03.png'; 
+        img.alt = 'Image';
+
+        // Nếu item có class active, thêm img vào đầu
+        if (item.classList.contains('active')) {
+            if (!item.querySelector('img')) {
+                item.insertBefore(img, item.firstChild); 
+            }
+        } else {
+            const existingImg = item.querySelector('img');
+            if (existingImg) {
+                existingImg.remove(); // Xóa img nếu không có class active
+            }
+        }
+    });
+
+    setTimeout(() => {
+        const activeItem = reviewItems[currentActive];
+        const containerWidth = reviewInner.offsetWidth;
+        const activeItemWidth = activeItem.offsetWidth;
+
+        // Tính toán khoảng cách dịch chuyển
+        const translateX =
+            activeItem.offsetLeft - containerWidth / 2 + activeItemWidth / 2;
+
+        // Áp dụng transform
+        reviewInner.style.transform = `translateX(${-translateX}px)`;
+    }, 50); 
 }
 
 reviewItems.forEach((item, index) => {
-  item.addEventListener('click', () => {
-    currentActive = index;
-    updateReview();
-  });
+    item.addEventListener('click', () => {
+        currentActive = index; 
+        updateSlider();
+    });
 });
-
-// Drag and drop for mouse
-reviewInner.addEventListener('mousedown', (e) => {
-  isDraggingReview = true;
-  startXReview = e.pageX;
-  prevTranslateX = currentTranslateX;
-  reviewInner.style.cursor = 'grabbing';
-});
-reviewInner.addEventListener('mousemove', (e) => {
-  if (!isDraggingReview) return;
-  e.preventDefault();
-  const deltaX = e.pageX - startXReview;
-  currentTranslateX = prevTranslateX + deltaX;
-  reviewInner.style.transform = `translateX(${currentTranslateX}px)`;
-});
-reviewInner.addEventListener('mouseup', () => {
-  isDraggingReview = false;
-  reviewInner.style.cursor = 'grab';
-  snapToClosestItem();
-});
-reviewInner.addEventListener('mouseleave', () => {
-  if (isDraggingReview) {
-    isDraggingReview = false;
-    snapToClosestItem();
-  }
-  reviewInner.style.cursor = 'grab';
-});
-
-// Kéo thả mobile
-reviewInner.addEventListener('touchstart', (e) => {
-  isDraggingReview = true;
-  startXReview = e.touches[0].pageX; n
-  prevTranslateX = currentTranslateX;
-  reviewInner.style.cursor = 'grabbing';
-});
-reviewInner.addEventListener('touchmove', (e) => {
-  if (!isDraggingReview) return;
-  e.preventDefault();
-  const deltaX = e.touches[0].pageX - startXReview;
-  currentTranslateX = prevTranslateX + deltaX;
-  reviewInner.style.transform = `translateX(${currentTranslateX}px)`;
-});
-reviewInner.addEventListener('touchend', () => {
-  isDraggingReview = false;
-  snapToClosestItem();
-});
-reviewInner.addEventListener('touchcancel', () => {
-  isDraggingReview = false;
-  snapToClosestItem();
-});
-
-function snapToClosestItem() {
-  let closestIndex = 0;
-  let closestDistance = Infinity;
-
-  reviewItems.forEach((item, index) => {
-    const itemCenter = item.offsetLeft + item.offsetWidth / 2;
-    const containerCenter = -currentTranslateX + reviewInner.offsetWidth / 2;
-    const distance = Math.abs(containerCenter - itemCenter);
-
-    if (distance < closestDistance) {
-      closestDistance = distance;
-      closestIndex = index;
-    }
-  });
-
-  currentActive = closestIndex;
-  updateReview();
-}
 
 window.addEventListener('load', () => {
-  updateReview();
+    updateSlider();
 });
-
-
 // setInterval(() => {
 //     currentActive = (currentActive + 1) % reviewItems.length;
-//     updateReview();
-// }, 3000); 
+//     updateSlider();
+// }, 3000);
